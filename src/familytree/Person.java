@@ -6,12 +6,11 @@ package familytree;
  */
 public class Person {
 
-    public enum Gender {
-        MALE, FEMALE
-    }
-    String name, dateOfBirth, birthPlace;
-    int age;
-    Gender gender;
+    private String name, dateOfBirth, birthPlace;
+    private int age;
+    //basic information about family relationships. Relationships like
+    //'stepfather' aren't set, as they can be inferred.
+    private boolean isMother, isFather, isMarried, isDivorced, isAdopted;
 
     /** Creates a new instance of Person */
     public Person() {
@@ -21,13 +20,20 @@ public class Person {
         this.name = aName;
         this.dateOfBirth = aDOB;
         this.birthPlace = aBirthPlace;
+        
+        this.isMother = this.isFather = this.isMarried = this.isDivorced = this.isAdopted = false;
     }
-
-    public Person(String aName, String aDOB, String aBirthPlace, Gender gender) {
-        this.name = aName;
-        this.dateOfBirth = aDOB;
-        this.birthPlace = aBirthPlace;
-        this.gender = gender;
+    
+    //If two people's names are the same, and their date of birth's0 are the same, then
+    //they are the same person.
+    public boolean equals(Person comparedPerson) {
+        boolean equals = false;
+        if(comparedPerson.getName().equals(this.getName()) 
+                && comparedPerson.getDateOfBirth().equals(this.getDateOfBirth())) {
+            equals = true;
+        }
+        
+        return equals;
     }
 
     public int getAge() {
@@ -60,6 +66,46 @@ public class Person {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isDivorced() {
+        return isDivorced;
+    }
+
+    public void setIsDivorced(boolean isDivorced) {
+        this.isDivorced = isDivorced;
+    }
+
+    public boolean isFather() {
+        return isFather;
+    }
+
+    public void setIsFather(boolean isFather) {
+        this.isFather = isFather;
+    }
+
+    public boolean isMarried() {
+        return isMarried;
+    }
+
+    public void setIsMarried(boolean isMarried) {
+        this.isMarried = isMarried;
+    }
+
+    public boolean isMother() {
+        return isMother;
+    }
+
+    public void setIsMother(boolean isMother) {
+        this.isMother = isMother;
+    }
+    
+    public boolean isAdopted() {
+        return isAdopted;
+    }
+    
+    public void setIsAdopted(boolean isAdopted) {
+        this.isAdopted = isAdopted;
     }
 
     @Override
