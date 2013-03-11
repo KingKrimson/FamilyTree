@@ -132,7 +132,9 @@ public class TestFamilyTree {
                     System.out.println("\nInvalid input choice. Try again\n"); //do nothing
             }
             inputMenu();
+            do {
             selection = scan.nextLine().toUpperCase();
+            } while(selection.isEmpty());
             iChoice = selection.charAt(0);
         }
     }
@@ -149,7 +151,9 @@ public class TestFamilyTree {
         char qChoice;
         int numOfGens;
 
+        do {
         selection = scan.nextLine().toUpperCase();
+        } while(selection.isEmpty());
         qChoice = selection.charAt(0);
         while (qChoice != 'X') {
             switch (qChoice) {
@@ -196,7 +200,9 @@ public class TestFamilyTree {
                     break;
             }
             queryMenu();
+            do {
             selection = scan.nextLine().toUpperCase();
+            } while (selection.isEmpty());
             qChoice = selection.charAt(0);
         }
     }
@@ -340,7 +346,9 @@ public class TestFamilyTree {
         String selection;
 
         tFT.menu();
+        do {
         selection = scan.nextLine().toUpperCase();
+        } while(selection.isEmpty());
         mChoice = selection.charAt(0);
         while (mChoice != 'X') {
             switch (mChoice) {
@@ -363,7 +371,9 @@ public class TestFamilyTree {
                 }
             }
             tFT.menu();
+            do {
             selection = scan.nextLine().toUpperCase();
+            } while (selection.isEmpty());
             mChoice = selection.charAt(0);
         }
     }

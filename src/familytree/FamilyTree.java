@@ -160,6 +160,9 @@ public class FamilyTree {
      * List the details of the person whose name is given. Note you need to do
      * something about the possibility of duplicate names appearing.
      * 
+     * This lists the person's details, and, if present, their parents, siblings,
+     * and children.
+     * 
      * possibly list parents, children, etc?
      * @param personName
      * @param aDOB
@@ -170,6 +173,9 @@ public class FamilyTree {
         if (personInTree(personName, aDOB) != -1) {
             FamilyTreeNode<Person> person = getPerson(personName, aDOB);
             details += person.getItem().toString() + "\n";
+            details += this.listParentDetails(personName, aDOB);
+            details += this.listSiblings(personName, aDOB);
+            details += this.listChildren(personName, aDOB);
         } else {
             details = personName + " isn't in the tree.\n";
         }
@@ -250,7 +256,7 @@ public class FamilyTree {
     }
 
     /**
-     * TODO: step-siblings, adopted siblings.
+     * TODO: step-siblings, half-siblings.
      * List the details of the siblings of the person whose name is given. Note
      * you need to do something about the possibility of duplicate names
      * appearing.
@@ -269,12 +275,14 @@ public class FamilyTree {
                             if (details.isEmpty()) {
                                 details += personName + "'s siblings:\n";
                             }
-                            if (sibling.getItem().isAdopted()) {
-                                details += "Adopted Sibling: ";
-                            } else {
-                                details += "Sibling: ";
+                            if (!details.contains(sibling.getItem().toString())) {
+                                if (sibling.getItem().isAdopted()) {
+                                    details += "Adopted Sibling: ";
+                                } else {
+                                    details += "Sibling: ";
+                                }
+                                details += sibling.getItem().toString() + "\n";
                             }
-                            details += sibling.toString() + "\n";
                         }
                     }
                 }
@@ -311,11 +319,42 @@ public class FamilyTree {
      * @param aDOB
      */
     public String listMaternalLineage(String personName, String aDOB) {
-        return "Not implemented";
+        String details = "";
+        ArrayList<FamilyTreeNode<Person>> ancestors = new ArrayList<FamilyTreeNode<Person>>();
+
+        if (personInTree(personName, aDOB) != -1) {
+            FamilyTreeNode<Person> person = getPerson(personName, aDOB);
+            if (hasMother(person.getItem().getName(), person.getItem().getDateOfBirth())) {
+                FamilyTreeNode<Person> mother = null;
+
+                for (FamilyTreeNode<Person> parent : person.getParentLinks()) {
+                    if (parent.getItem().isMother()) {
+                        mother = parent;
+                        break;
+                    }
+                }
+
+                details += personName + "'s mother is: ";
+                details += mother.getItem().toString() + "\n";
+                details += "Listing ancestors:\n";
+                ancestors.add(mother);
+                FamilyTreeNode<Person> ancestor = mother;
+                do {
+                    for (FamilyTreeNode<Person> nextAncestor : ancestor.getParentLinks()) {
+                        ancestors.add(nextAncestor);
+                    }
+                } while (!ancestors.isEmpty());
+            } else {
+                details += personName += "does not have a mother.";
+            }
+        } else {
+            details += personName + " is not in the tree.";
+        }
+
+        return details;
     }
 
     /**
-     * TODO: Step Grandparents? Are they even a thing?
      * List the details of the grandparents of the person
      * whose name is given. Note you need to do something about the possibility
      * of duplicate names appearing.
@@ -343,7 +382,7 @@ public class FamilyTree {
                         } else {
                             details += "Grandfather: ";
                         }
-                        details += grandparent.toString();
+                        details += grandparent.getItem().toString() + "\n";
                     }
                 }
                 if (details.isEmpty()) {
@@ -359,7 +398,6 @@ public class FamilyTree {
     }
 
     /**
-     * TODO: Step Grandchildren?
      * List the details of the grandchildren of the person whose name is given.
      * Note you need to do something about the possibility of duplicate names
      * appearing.
@@ -422,8 +460,10 @@ public class FamilyTree {
                                     if (details.isEmpty()) {
                                         details += personName + "'s cousins:\n";
                                     }
+                                    if(!details.contains(cousin.getItem().toString())) {
                                     details += "Cousin: ";
-                                    details += cousin.toString();
+                                    details += cousin.getItem().toString() + "\n";
+                                    }
                                 }
                             }
                         }
@@ -452,7 +492,39 @@ public class FamilyTree {
      *                            3=great-grandparents etc.
      */
     public String listGreatNGrandParents(String personName, String aDOB, int numberOfGenerations) {
-        return "Not Implemented.";
+        String details = "";
+        ArrayList<FamilyTreeNode<Person>> currentAncestors = new ArrayList<FamilyTreeNode<Person>>();
+        ArrayList<FamilyTreeNode<Person>> nextAncestors = new ArrayList<FamilyTreeNode<Person>>();
+
+        if (personInTree(personName, aDOB) != -1) {
+            FamilyTreeNode<Person> person = getPerson(personName, aDOB);
+            currentAncestors.add(person);
+            for (int i = numberOfGenerations; i < 0; i--) {
+                for (FamilyTreeNode<Person> currentAncestor : currentAncestors) {
+                    for (FamilyTreeNode<Person> nextAncestor : currentAncestor.getParentLinks()) {
+                        nextAncestors.add(nextAncestor);
+                    }
+                }
+                currentAncestors = nextAncestors;
+                nextAncestors.clear();
+            }
+            if (currentAncestors.isEmpty()) {
+                details += personName + " doesn't have any generation " + numberOfGenerations + " parents.\n";
+            } else {
+                details += personName + "'s generation " + numberOfGenerations + " parents:\n";
+            }
+            for (FamilyTreeNode<Person> currentAncestor : currentAncestors) {
+                if (currentAncestor.getItem().isMother()) {
+                    details += "Generation " + numberOfGenerations + " mother: ";
+                } else {
+                    details += "Generation " + numberOfGenerations + " father: ";
+                }
+                details += currentAncestor.getItem().toString() + "\n";
+            }
+        } else {
+            details += personName + " is not in tree.\n";
+        }
+        return details;
     }
 
     /**
@@ -465,7 +537,37 @@ public class FamilyTree {
      *                            3=great-grandchildren etc.
      */
     public String listGreatNGrandChildren(String personName, String aDOB, int numberOfGenerations) {
-        return "Not implemented.";
+        String details = "";
+        ArrayList<FamilyTreeNode<Person>> currentChildren = new ArrayList<FamilyTreeNode<Person>>();
+        ArrayList<FamilyTreeNode<Person>> nextChildren = new ArrayList<FamilyTreeNode<Person>>();
+
+        if (personInTree(personName, aDOB) != -1) {
+            FamilyTreeNode<Person> person = getPerson(personName, aDOB);
+            currentChildren.add(person);
+            for (int i = numberOfGenerations; i < 0; i--) {
+                for (FamilyTreeNode<Person> currentChild : currentChildren) {
+                    for (FamilyTreeNode<Person> nextChild : currentChild.getChildLinks()) {
+                        nextChildren.add(nextChild);
+                    }
+                }
+                currentChildren = nextChildren;
+                nextChildren.clear();
+            }
+            
+            if (currentChildren.isEmpty()) {
+                details += personName + " doesn't have any generation " + numberOfGenerations + " children.\n";
+            } else {
+                details += personName + "'s generation " + numberOfGenerations + " children:\n";
+            }
+            for (FamilyTreeNode<Person> currentChild : currentChildren) {
+
+                details += "Generation " + numberOfGenerations + " child: ";
+                details += currentChild.getItem().toString() + "\n";
+            }
+        } else {
+            details += personName + " is not in tree.\n";
+        }
+        return details;
     }
 
     /**
@@ -516,8 +618,9 @@ public class FamilyTree {
             person = getPerson(aName, aDOB);
 
             for (FamilyTreeNode<Person> parent : person.getParentLinks()) {
-                if (parent.getItem().isMother());
-                return true;
+                if (parent.getItem().isMother()) {
+                    return true;
+                }
             }
         }
         return false;
@@ -530,8 +633,9 @@ public class FamilyTree {
             person = getPerson(aName, aDOB);
 
             for (FamilyTreeNode<Person> parent : person.getParentLinks()) {
-                if (parent.getItem().isFather());
-                return true;
+                if (parent.getItem().isFather()) {
+                    return true;
+                }
             }
         }
         return false;
@@ -557,7 +661,7 @@ public class FamilyTree {
      * @param aDOB
      * @return 
      */
-    public FamilyTreeNode getPerson(String aName, String aDOB) {
+    public FamilyTreeNode<Person> getPerson(String aName, String aDOB) {
         int index;
         FamilyTreeNode<Person> person = null;
 

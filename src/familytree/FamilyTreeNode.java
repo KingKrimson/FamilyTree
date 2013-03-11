@@ -19,18 +19,18 @@ public class FamilyTreeNode<LI> {
     private LI item; //The actual item contained in the node.
     //Lists for each type of link. Allows for multiple parent links, which
     //the trees in the Java Collection API don't.
-    private List<FamilyTreeNode> parentLinks;
-    private List<FamilyTreeNode> childLinks;
-    private List<FamilyTreeNode> sideLinks;
+    private List<FamilyTreeNode<LI>> parentLinks;
+    private List<FamilyTreeNode<LI>> childLinks;
+    private List<FamilyTreeNode<LI>> sideLinks;
 
     /**
      * create an empty TreeNode.
      */
     public FamilyTreeNode() {
 
-        parentLinks = new ArrayList<FamilyTreeNode>();
-        childLinks = new ArrayList<FamilyTreeNode>();
-        sideLinks = new ArrayList<FamilyTreeNode>();
+        parentLinks = new ArrayList<FamilyTreeNode<LI>>();
+        childLinks = new ArrayList<FamilyTreeNode<LI>>();
+        sideLinks = new ArrayList<FamilyTreeNode<LI>>();
     }
 
     /**
@@ -40,9 +40,9 @@ public class FamilyTreeNode<LI> {
     public FamilyTreeNode(LI item) {
 
         this.item = item;
-        parentLinks = new ArrayList<FamilyTreeNode>();
-        childLinks = new ArrayList<FamilyTreeNode>();
-        sideLinks = new ArrayList<FamilyTreeNode>();
+        parentLinks = new ArrayList<FamilyTreeNode<LI>>();
+        childLinks = new ArrayList<FamilyTreeNode<LI>>();
+        sideLinks = new ArrayList<FamilyTreeNode<LI>>();
     }
 
     /**
@@ -76,12 +76,12 @@ public class FamilyTreeNode<LI> {
      */
     public int addOneWayParentLink(FamilyTreeNode<LI> parent) {
 
-        int status = 1;
+        int status = 0;
 
         if (!this.containsParentLink(parent)) {
             this.parentLinks.add(parent);
         } else {
-            status = 0;
+            status = 1;
         }
 
         return status;
@@ -138,12 +138,12 @@ public class FamilyTreeNode<LI> {
      */
     public int addOneWayChildLink(FamilyTreeNode<LI> child) {
 
-        int status = 1;
+        int status = 0;
 
         if (!this.containsChildLink(child)) {
             this.childLinks.add(child);
         } else {
-            status = 0;
+            status = 1;
         }
 
         return status;
@@ -322,7 +322,7 @@ public class FamilyTreeNode<LI> {
      * Returns the childLinks list.
      * @return 
      */
-    public List<FamilyTreeNode> getChildLinks() {
+    public List<FamilyTreeNode<LI>> getChildLinks() {
         return childLinks;
     }
 
@@ -330,7 +330,7 @@ public class FamilyTreeNode<LI> {
      * Set the childLinks List. Takes another List as a parameter.
      * @param childLinks 
      */
-    public void setChildLinks(List<FamilyTreeNode> childLinks) {
+    public void setChildLinks(List<FamilyTreeNode<LI>> childLinks) {
         this.childLinks = childLinks;
     }
 
@@ -338,7 +338,7 @@ public class FamilyTreeNode<LI> {
      * Return the parentLinks list.
      * @return 
      */
-    public List<FamilyTreeNode> getParentLinks() {
+    public List<FamilyTreeNode<LI>> getParentLinks() {
         return parentLinks;
     }
 
@@ -346,7 +346,7 @@ public class FamilyTreeNode<LI> {
      * Set the parentLinks list. Takes a list as a parameter.
      * @param parentLinks 
      */
-    public void setParentLinks(List<FamilyTreeNode> parentLinks) {
+    public void setParentLinks(List<FamilyTreeNode<LI>> parentLinks) {
         this.parentLinks = parentLinks;
     }
 
@@ -354,7 +354,7 @@ public class FamilyTreeNode<LI> {
      * Return the sideLinks list.
      * @return 
      */
-    public List<FamilyTreeNode> getSideLinks() {
+    public List<FamilyTreeNode<LI>> getSideLinks() {
         return sideLinks;
     }
 
@@ -362,7 +362,7 @@ public class FamilyTreeNode<LI> {
      * Set the sideLinks list. Takes another list as a parameter.
      * @param sideLinks 
      */
-    public void setSideLinks(List<FamilyTreeNode> sideLinks) {
+    public void setSideLinks(List<FamilyTreeNode<LI>> sideLinks) {
         this.sideLinks = sideLinks;
     }
 } //end of 'Node'

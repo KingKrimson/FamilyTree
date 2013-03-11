@@ -111,7 +111,7 @@ public class Person {
     @Override
     public String toString() {
         String desc = "Name: " + this.getName() + ", Date of Birth: " + this.getDateOfBirth()
-                + ", BirthPlace: " + this.getBirthPlace();
+                + ", Birth Place: " + this.getBirthPlace();
         return desc;
     }
 }
