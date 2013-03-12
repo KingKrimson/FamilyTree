@@ -307,8 +307,33 @@ public class FamilyTree {
      * @param aDOB
      */
     public String listPaternalLineage(String personName, String aDOB) {
-        //all of them? I guess so.
-        return "Not implemented.";
+        String details = "";
+        FamilyTreeNode<Person> person;
+
+        if ((person = getPerson(personName, aDOB)) != null) {
+            while (!person.parentLinksIsEmpty()) {
+                if (details.isEmpty()) {
+                    if (person.getItem().isAdopted()) {
+                        details += personName + "'s adoptive paternal lineage (Order: Father, Grandfather, Great Grandfather, etc):\n";
+                    } else {
+                        details += personName + "'s paternal lineage (Order: Father, Grandfather, Great Grandfather, etc):\n";
+                    }
+                }
+                for (FamilyTreeNode<Person> father : person.getParentLinks()) {
+                    if (father.getItem().isFather()) {
+                        person = father;
+                        break;
+                    }
+                }
+                details += "Male ancestor: " + person.getItem().toString() + "\n";
+            }
+            if (details.isEmpty()) {
+                details += personName + " does not have a father listed. Therefore, we could not find a paternal lineage.\n";
+            }
+        } else {
+            details += personName + " is not in the tree.\n";
+        }
+        return details;
     }
 
     /**
@@ -320,37 +345,31 @@ public class FamilyTree {
      */
     public String listMaternalLineage(String personName, String aDOB) {
         String details = "";
-        ArrayList<FamilyTreeNode<Person>> ancestors = new ArrayList<FamilyTreeNode<Person>>();
+        FamilyTreeNode<Person> person;
 
-        if (personInTree(personName, aDOB) != -1) {
-            FamilyTreeNode<Person> person = getPerson(personName, aDOB);
-            if (hasMother(person.getItem().getName(), person.getItem().getDateOfBirth())) {
-                FamilyTreeNode<Person> mother = null;
-
-                for (FamilyTreeNode<Person> parent : person.getParentLinks()) {
-                    if (parent.getItem().isMother()) {
-                        mother = parent;
+        if ((person = getPerson(personName, aDOB)) != null) {
+            while (!person.parentLinksIsEmpty()) {
+                if (details.isEmpty()) {
+                    if (person.getItem().isAdopted()) {
+                        details += personName + "'s adoptive maternal lineage (Order: Mother, Grandmother, Great Grandmother, etc):\n";
+                    } else {
+                        details += personName + "'s maternal lineage (Order: Father, Grandfather, Great Grandfather, etc):\n";
+                    }
+                }
+                for (FamilyTreeNode<Person> mother : person.getParentLinks()) {
+                    if (mother.getItem().isMother()) {
+                        person = mother;
                         break;
                     }
                 }
-
-                details += personName + "'s mother is: ";
-                details += mother.getItem().toString() + "\n";
-                details += "Listing ancestors:\n";
-                ancestors.add(mother);
-                FamilyTreeNode<Person> ancestor = mother;
-                do {
-                    for (FamilyTreeNode<Person> nextAncestor : ancestor.getParentLinks()) {
-                        ancestors.add(nextAncestor);
-                    }
-                } while (!ancestors.isEmpty());
-            } else {
-                details += personName += "does not have a mother.";
+                details += "Female ancestor: " + person.getItem().toString() + "\n";
+            }
+            if (details.isEmpty()) {
+                details += personName + " does not have a mother listed. Therefore, we could not find a maternal lineage.\n";
             }
         } else {
-            details += personName + " is not in the tree.";
+            details += personName + " is not in the tree.\n";
         }
-
         return details;
     }
 
@@ -460,9 +479,9 @@ public class FamilyTree {
                                     if (details.isEmpty()) {
                                         details += personName + "'s cousins:\n";
                                     }
-                                    if(!details.contains(cousin.getItem().toString())) {
-                                    details += "Cousin: ";
-                                    details += cousin.getItem().toString() + "\n";
+                                    if (!details.contains(cousin.getItem().toString())) {
+                                        details += "Cousin: ";
+                                        details += cousin.getItem().toString() + "\n";
                                     }
                                 }
                             }
@@ -496,33 +515,37 @@ public class FamilyTree {
         ArrayList<FamilyTreeNode<Person>> currentAncestors = new ArrayList<FamilyTreeNode<Person>>();
         ArrayList<FamilyTreeNode<Person>> nextAncestors = new ArrayList<FamilyTreeNode<Person>>();
 
-        if (personInTree(personName, aDOB) != -1) {
-            FamilyTreeNode<Person> person = getPerson(personName, aDOB);
-            currentAncestors.add(person);
-            for (int i = numberOfGenerations; i < 0; i--) {
-                for (FamilyTreeNode<Person> currentAncestor : currentAncestors) {
-                    for (FamilyTreeNode<Person> nextAncestor : currentAncestor.getParentLinks()) {
-                        nextAncestors.add(nextAncestor);
+        if (numberOfGenerations > 0) {
+            if (personInTree(personName, aDOB) != -1) {
+                FamilyTreeNode<Person> person = getPerson(personName, aDOB);
+                currentAncestors.add(person);
+                for (int i = numberOfGenerations; i > 0; i--) {
+                    for (FamilyTreeNode<Person> currentAncestor : currentAncestors) {
+                        for (FamilyTreeNode<Person> nextAncestor : currentAncestor.getParentLinks()) {
+                            nextAncestors.add(nextAncestor);
+                        }
                     }
+                    currentAncestors = nextAncestors;
+                    nextAncestors.clear();
                 }
-                currentAncestors = nextAncestors;
-                nextAncestors.clear();
-            }
-            if (currentAncestors.isEmpty()) {
-                details += personName + " doesn't have any generation " + numberOfGenerations + " parents.\n";
-            } else {
-                details += personName + "'s generation " + numberOfGenerations + " parents:\n";
-            }
-            for (FamilyTreeNode<Person> currentAncestor : currentAncestors) {
-                if (currentAncestor.getItem().isMother()) {
-                    details += "Generation " + numberOfGenerations + " mother: ";
+                if (currentAncestors.isEmpty()) {
+                    details += personName + " doesn't have any generation " + numberOfGenerations + " parents.\n";
                 } else {
-                    details += "Generation " + numberOfGenerations + " father: ";
+                    details += personName + "'s generation " + numberOfGenerations + " parents:\n";
                 }
-                details += currentAncestor.getItem().toString() + "\n";
+                for (FamilyTreeNode<Person> currentAncestor : currentAncestors) {
+                    if (currentAncestor.getItem().isMother()) {
+                        details += "Generation " + numberOfGenerations + " mother: ";
+                    } else {
+                        details += "Generation " + numberOfGenerations + " father: ";
+                    }
+                    details += currentAncestor.getItem().toString() + "\n";
+                }
+            } else {
+                details += personName + " is not in tree.\n";
             }
         } else {
-            details += personName + " is not in tree.\n";
+            details += "Please enter a positive, non-zero integer for generation.\n";
         }
         return details;
     }
@@ -553,7 +576,7 @@ public class FamilyTree {
                 currentChildren = nextChildren;
                 nextChildren.clear();
             }
-            
+
             if (currentChildren.isEmpty()) {
                 details += personName + " doesn't have any generation " + numberOfGenerations + " children.\n";
             } else {
