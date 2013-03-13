@@ -99,11 +99,12 @@ public class FamilyTreeNode<LI> {
 
     public int removeOneWayParentLink(FamilyTreeNode<LI> parent) {
 
-        int status = 1;
+        int status = 0;
 
-        if (parentLinks.contains(parent)) {
-            parentLinks.remove(parent);
-            status = 0;
+        if (this.containsParentLink(parent)) {
+            this.parentLinks.remove(parent);
+        } else {
+            status = 1;
         }
         return status;
     }
@@ -161,12 +162,14 @@ public class FamilyTreeNode<LI> {
 
     public int removeOneWayChildLink(FamilyTreeNode<LI> child) {
 
-        int status = 1;
+        int status = 0;
 
-        if (childLinks.contains(child)) {
+        if (this.containsChildLink(child)) {
             childLinks.remove(child);
-            status = 0;
+        } else {
+            status = 1;
         }
+
         return status;
     }
 
@@ -194,12 +197,12 @@ public class FamilyTreeNode<LI> {
      * @return 
      */
     public int addOneWaySideLink(FamilyTreeNode<LI> side) {
-        int status = 1;
+        int status = 0;
 
         if (!this.containsSideLink(side)) {
             this.sideLinks.add(side);
         } else {
-            status = 0;
+            status = 1;
         }
 
         return status;
@@ -217,11 +220,12 @@ public class FamilyTreeNode<LI> {
 
     public int removeOneWaySideLink(FamilyTreeNode<LI> side) {
 
-        int status = 1;
+        int status = 0;
 
-        if (sideLinks.contains(side)) {
+        if (this.containsSideLink(side)) {
             sideLinks.remove(side);
-            status = 0;
+        } else {
+            status = 1;
         }
         return status;
     }

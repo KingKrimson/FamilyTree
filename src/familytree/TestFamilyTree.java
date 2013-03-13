@@ -25,7 +25,8 @@ import java.io.*;
  *
  * @author      David Coward
  * @author      Jane Berry
- * @version     2
+ * @author      Andrew Brown
+ * @version     3
  */
 public class TestFamilyTree {
 
@@ -48,7 +49,7 @@ public class TestFamilyTree {
     public String getPersonName() {
         Scanner scan = new Scanner(System.in);
         String personName;
-        System.out.println("Enter - name: ");
+        System.out.print("Enter - name: ");
         personName = scan.nextLine();
         return personName;
     }
@@ -56,9 +57,18 @@ public class TestFamilyTree {
     public String getDateOfBirth() {
         Scanner scan = new Scanner(System.in);
         String dateOfBirth;
-        System.out.println("Enter - date of birth: ");
+        System.out.print("Enter - date of birth: ");
         dateOfBirth = scan.nextLine();
         return dateOfBirth;
+    }
+
+    public int getNumberOfGens() {
+        Scanner scan = new Scanner(System.in);
+        int numOfGens;
+        System.out.print("Now enter - number of Generations required : ");
+        numOfGens = scan.nextInt();
+        scan.nextLine();
+        return numOfGens;
     }
 
     /**
@@ -75,66 +85,114 @@ public class TestFamilyTree {
         char iChoice;
 
         do {
-        selection = scan.nextLine().toUpperCase();
-        } while(selection.isEmpty());
+            selection = scan.nextLine().toUpperCase();
+        } while (selection.isEmpty());
         iChoice = selection.charAt(0);
         while (iChoice != 'X') {
             switch (iChoice) {
                 case 'A':
-                    System.out.println("Enter - name, DOB and place of birth ");
+                    System.out.println("Enter - name, DOB and place of birth:");
+                    System.out.print("Name: ");
                     personName = scan.nextLine();
+                    System.out.print("Date of birth: ");
                     dOB = scan.nextLine();
+                    System.out.print("Place of birth: ");
                     place = scan.nextLine();
                     Person aPerson = new Person(personName, dOB, place);
-                    fTree1.addPerson(aPerson);
+                    if(fTree1.addPerson(aPerson) != false) {
+                        System.out.println(personName + " " + dOB + " " + place);
+                    } else {
+                        System.out.println(personName + " " + dOB 
+                                + " already exists in the tree.");
+                    }
                     break;
                 case 'B':
                     System.out.println("Enter - name, DOB, Mother's name and DOB: ");
+                    System.out.print("Name: ");
                     personName = scan.nextLine();
+                    System.out.print("Date of birth: ");
                     dOB = scan.nextLine();
+                    System.out.print("Mother's name: ");
                     mothersName = scan.nextLine();
+                    System.out.print("Mother's date of birth: ");
                     mDOB = scan.nextLine();
-                    fTree1.makeLinkToMother(personName, dOB, mothersName, mDOB);
+                    if(fTree1.makeLinkToMother(personName, dOB, mothersName, mDOB) != false) {
+                        System.out.println(personName + " " + dOB + " " 
+                                + mothersName + " " + mDOB + " mother added.");
+                    } else {
+                        System.out.println("Mother link failed. Do both people "
+                                + "exist, and if so, are they already linked?");
+                    }
                     break;
                 case 'C':
                     System.out.println("Enter - name, DOB, Father's name and DOB: ");
+                    System.out.print("Name: ");
                     personName = scan.nextLine();
+                    System.out.print("Date of birth: ");
                     dOB = scan.nextLine();
+                    System.out.print("Father's name: ");
                     fathersName = scan.nextLine();
+                    System.out.print("Father's date of birth: ");
                     fDOB = scan.nextLine();
-                    fTree1.makeLinkToFather(personName, dOB, fathersName, fDOB);
+                    if(fTree1.makeLinkToFather(personName, dOB, fathersName, fDOB) != false) {
+                        System.out.println(personName + " " + dOB + " " 
+                                + fathersName + " " + fDOB + " father added.");
+                    } else {
+                        System.out.println("Father link failed. Do both people "
+                                + "exist, and if so, are they already linked?");
+                    }
                     break;
                 case 'D':
                     System.out.println("Enter - Bride's name and DOB "
-                            + "and Groom's name and DOB : ");
+                            + "and Groom's name and DOB: ");
+                    System.out.print("Bride's name: ");
                     bridesName = scan.nextLine();
+                    System.out.print("Bride's date of birth: ");
                     dOB = scan.nextLine();
+                    System.out.print("Groom's name :");
                     groomsName = scan.nextLine();
+                    System.out.print("Groom's date of birth: ");
                     gDOB = scan.nextLine();
-                    fTree1.recordWedding(bridesName, dOB, groomsName, gDOB);
+                    if(fTree1.recordWedding(bridesName, dOB, groomsName, gDOB) != false) {
+                        System.out.println("Marriage link successful!");
+                    } else {
+                        System.out.println("Marriage link failed. Do both people"
+                                + " exist, and if so, are they already married?");
+                    }
                     break;
                 case 'E':
                     System.out.println("Enter - Wife's name and DOB "
-                            + "and Husband's name and DOB : ");
+                            + "and Husband's name and DOB: ");
+                    System.out.print("Wife's name: ");
                     bridesName = scan.nextLine();
+                    System.out.print("Wife's date of birth: ");
                     dOB = scan.nextLine();
+                    System.out.print("Grooms's date of birth: ");
                     groomsName = scan.nextLine();
+                    System.out.print("Groom's date of birth: ");
                     gDOB = scan.nextLine();
-                    fTree1.recordDivorce(bridesName, dOB, groomsName, gDOB);
+                    if(fTree1.recordDivorce(bridesName, dOB, groomsName, gDOB) != false) {
+                        System.out.println("Divorce successful!");
+                    } else {
+                        System.out.println("Divorce failed. Do both people exist, and if so, are they actually married?");
+                    }
                     break;
                 case 'F':
-                    System.out.println("Enter - name and DOB of person adopted : ");
+                    System.out.println("Enter - name and DOB of person adopted: ");
+                    System.out.print("Person name: ");
                     personName = scan.nextLine();
+                    System.out.print("Person date of birth: ");
                     dOB = scan.nextLine();
                     fTree1.recordAdoption(personName, dOB);
+                    System.out.println(personName + " " + dOB + " listed as adopted.");
                     break;
                 default:
                     System.out.println("\nInvalid input choice. Try again\n"); //do nothing
             }
             inputMenu();
             do {
-            selection = scan.nextLine().toUpperCase();
-            } while(selection.isEmpty());
+                selection = scan.nextLine().toUpperCase();
+            } while (selection.isEmpty());
             iChoice = selection.charAt(0);
         }
     }
@@ -147,13 +205,12 @@ public class TestFamilyTree {
      */
     private void processQuery() {
         Scanner scan = new Scanner(System.in);
-        String selection, personName;
+        String selection;
         char qChoice;
-        int numOfGens;
 
         do {
-        selection = scan.nextLine().toUpperCase();
-        } while(selection.isEmpty());
+            selection = scan.nextLine().toUpperCase();
+        } while (selection.isEmpty());
         qChoice = selection.charAt(0);
         while (qChoice != 'X') {
             switch (qChoice) {
@@ -185,23 +242,15 @@ public class TestFamilyTree {
                     System.out.println(fTree1.listCousins(this.getPersonName(), this.getDateOfBirth()));
                     break;
                 case 'T':
-                    personName = this.getPersonName();
-                    System.out.println("Now enter - number of Generations required : ");
-                    numOfGens = scan.nextInt();
-                    scan.nextLine();
-                    System.out.println(fTree1.listGreatNGrandParents(personName, this.getDateOfBirth(), numOfGens));
+                    System.out.println(fTree1.listGreatNGrandParents(this.getPersonName(), this.getDateOfBirth(), this.getNumberOfGens()));
                     break;
                 case 'U':
-                    personName = this.getPersonName();
-                    System.out.println("Now enter - number of Generations required : ");
-                    numOfGens = scan.nextInt();
-                    scan.nextLine();
-                    System.out.println(fTree1.listGreatNGrandChildren(personName, this.getDateOfBirth(), numOfGens));
+                    System.out.println(fTree1.listGreatNGrandChildren(this.getPersonName(), this.getDateOfBirth(), this.getNumberOfGens()));
                     break;
             }
             queryMenu();
             do {
-            selection = scan.nextLine().toUpperCase();
+                selection = scan.nextLine().toUpperCase();
             } while (selection.isEmpty());
             qChoice = selection.charAt(0);
         }
@@ -219,7 +268,7 @@ public class TestFamilyTree {
 
         System.out.println("X\tEXIT\n");
 
-        System.out.println("Enter menu choice L-I, X: ");
+        System.out.print("Enter menu choice L-I, X: ");
     }
 
     /**
@@ -237,7 +286,7 @@ public class TestFamilyTree {
 
         System.out.println("X\tEXIT INPUT\n");
 
-        System.out.println("Enter menu choice A-F, X: ");
+        System.out.print("Enter menu choice A-F, X: ");
     }
 
     /**
@@ -259,7 +308,7 @@ public class TestFamilyTree {
 
         System.out.println("X\tEXIT QUERY\n");
 
-        System.out.println("Enter menu choice K-U, X: ");
+        System.out.print("Enter menu choice K-U, X: ");
     }
 
     /**
@@ -295,8 +344,11 @@ public class TestFamilyTree {
             }
             if ((name != null) && (dOB != null) && (place != null)) {
                 Person aPerson = new Person(name, dOB, place);
-                fTree1.addPerson(aPerson);
-                System.out.println(name + " " + dOB + " ");
+                if (fTree1.addPerson(aPerson) != false) {
+                    System.out.println(name + " " + dOB + " was added to the tree.");
+                } else {
+                    System.out.println(name + " " + dOB + " is already in the tree.");
+                }
             }
         }
         // read file fathers.txt Foreach create father link
@@ -311,8 +363,11 @@ public class TestFamilyTree {
                 fDOB = lineScan.next();
             }
             if ((name != null) && (dOB != null) && (fName != null) && (fDOB != null)) {
-                fTree1.makeLinkToFather(name, dOB, fName, fDOB);
-                System.out.println(name + " " + dOB + " " + fName + " " + fDOB + " Father Added");
+                if (fTree1.makeLinkToFather(name, dOB, fName, fDOB) != false) {
+                    System.out.println(name + " " + dOB + " " + fName + " " + fDOB + " Father Added");
+                } else {
+                    System.out.println("Father link failed. Either the link already exists, or " + name + " already has a father.");
+                }
             }
         }
 
@@ -328,8 +383,11 @@ public class TestFamilyTree {
                 mDOB = lineScan.next();
             }
             if ((name != null) && (dOB != null) && (mName != null) && (mDOB != null)) {
-                fTree1.makeLinkToMother(name, dOB, mName, mDOB);
-                System.out.println(name + " " + dOB + " " + mName + " " + mDOB + " Mother Added");
+                if (fTree1.makeLinkToMother(name, dOB, mName, mDOB) != false) {
+                    System.out.println(name + " " + dOB + " " + mName + " " + mDOB + " Mother Added");
+                } else {
+                    System.out.println("Mother link failed. Either the link already exists, or " + name + " already has a father.");
+                }
             }
         }
     }
@@ -347,8 +405,8 @@ public class TestFamilyTree {
 
         tFT.menu();
         do {
-        selection = scan.nextLine().toUpperCase();
-        } while(selection.isEmpty());
+            selection = scan.nextLine().toUpperCase();
+        } while (selection.isEmpty());
         mChoice = selection.charAt(0);
         while (mChoice != 'X') {
             switch (mChoice) {
@@ -372,7 +430,7 @@ public class TestFamilyTree {
             }
             tFT.menu();
             do {
-            selection = scan.nextLine().toUpperCase();
+                selection = scan.nextLine().toUpperCase();
             } while (selection.isEmpty());
             mChoice = selection.charAt(0);
         }
