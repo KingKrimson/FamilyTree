@@ -5,9 +5,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Trees in the Java collection allow multiple children, but not multiple parents.
+ * Trees in the Java collection API allow multiple children, but not multiple parents.
  * This custom built data-structure allows for that possibility, as well as
- * 'side links', in this case for partners. 
+ * 'side links', in this case for partners. It also waits for the user to make
+ * explicit links; the trees in the Java collection API make links when you
+ * add them onto the tree, which isn't helpful when you have specific links
+ * in mind.
  * 
  * It's important to note that while the actual node is generic, the FamilyTree
  * structure is geared towards, well, family trees. It should be fairly trivial
@@ -25,8 +28,9 @@ public class FamilyTree {
     }
 
     /**
-     * Adds a new person to the family tree; or rather, unlinkedPeople. Returns
-     * true if the operation was successful, or false if the person already exists.
+     * Adds a new person to the family tree. Returns true if the operation was 
+     * successful, or false if the person already exists.
+     * 
      * @param aPerson Person to be added
      * @return
      */
@@ -46,7 +50,9 @@ public class FamilyTree {
 
     /**
      * Links an individual to their mother. Both the individual and the
-     * mother need already to appear as a Person in the family tree.
+     * mother need already to appear as a Person in the family tree. Returns true
+     * if successful, false if not.
+     * 
      * @param aPerson String holding individual's name.
      * @param aDOB String holding individual's date of birth.
      * @param mName String holding mother's name.
@@ -58,6 +64,8 @@ public class FamilyTree {
         FamilyTreeNode<Person> mother = getPerson(mName, mDOB);
 
         if (child != null && mother != null) {
+            //make sure that child doesn't already have a mother, and that there
+            //isn't already a link.
             if (hasMother(child.getItem().getName(), child.getItem().getDateOfBirth()) || mother.containsChildLink(child)) {
                 return false;
             } else {
@@ -84,6 +92,8 @@ public class FamilyTree {
         FamilyTreeNode<Person> father = getPerson(fName, fDOB);
 
         if (child != null && father != null) {
+            //make sure that child doesn't already have a father, and that there
+            //isn't already a link.
             if (hasFather(child.getItem().getName(), child.getItem().getDateOfBirth()) || father.containsChildLink(child)) {
                 return false;
             } else {
@@ -106,22 +116,25 @@ public class FamilyTree {
      */
     public boolean recordWedding(String partner1Name, String aDOB1,
             String partner2Name, String aDOB2) {
+        boolean success;
         FamilyTreeNode<Person> partner1 = getPerson(partner1Name, aDOB1);
         FamilyTreeNode<Person> partner2 = getPerson(partner2Name, aDOB2);
 
-        if ((partner1 != null) && (partner2 != null)) {
-
+        if ((partner1 == null) || (partner2 == null)) {
+            success = false;
+        } else {
+            //Make sure that neither person is already married.
             if (!partner1.sideLinksIsEmpty() || !partner2.sideLinksIsEmpty()) {
-                return false;
+                success = false;
             } else {
                 partner1.getItem().setIsMarried(true);
                 partner2.getItem().setIsMarried(true);
-
                 //adds two way link between the partners.
                 partner1.addSideLink(partner2);
+                success = true;
             }
         }
-        return false;
+        return success;
     }
 
     /**
@@ -134,32 +147,33 @@ public class FamilyTree {
      */
     public boolean recordDivorce(String partner1Name, String aDOB1,
             String partner2Name, String aDOB2) {
+        boolean success;
         FamilyTreeNode<Person> partner1 = getPerson(partner1Name, aDOB1);
         FamilyTreeNode<Person> partner2 = getPerson(partner2Name, aDOB2);
 
-        if ((partner1 != null) && (partner2 != null)) {
+        if ((partner1 == null) || (partner2 == null)) {
+            success = false;
+        } else {
+            //Make sure that the couple actually is married.
             if (!partner1.containsSideLink(partner2) || !partner2.containsSideLink(partner1)) {
-                return false;
+                success = false;
             } else {
                 partner1.getItem().setIsMarried(false);
                 partner1.getItem().setIsDivorced(true);
                 partner2.getItem().setIsMarried(false);
                 partner2.getItem().setIsDivorced(true);
-
+                //removes link between partners.
                 partner1.removeSideLink(partner2);
+                success = true;
             }
         }
-        return false;
+        return success;
     }
 
     /**
-     * List the details of the person whose name is given. Note you need to do
-     * something about the possibility of duplicate names appearing.
+     * This lists the person's name, date of birth and hometown. if present, 
+     * it also prints their parents, siblings, partner, and children.
      * 
-     * This lists the person's details, and, if present, their parents, siblings,
-     * and children.
-     * 
-     * possibly list parents, children, etc?
      * @param personName
      * @param aDOB
      */
@@ -169,6 +183,16 @@ public class FamilyTree {
 
         if ((person = getPerson(personName, aDOB)) != null) {
             details += person.getItem().toString() + "\n";
+            if (person.getItem().isAdopted()) {
+                details += personName + " is adopted.\n";
+            }
+            if (person.getItem().isMarried()) {
+                details += personName +  " is currently married to "
+                        + person.getSideLinks().get(0).getItem().toString() + "\n";
+            }
+            if (person.getItem().isDivorced()) {
+                details += "personName has had a divorce in the past.\n";
+            }
             details += this.listParentDetails(personName, aDOB);
             details += this.listSiblings(personName, aDOB);
             if (!person.sideLinksIsEmpty() && person.getItem().isMarried()) {
@@ -183,10 +207,8 @@ public class FamilyTree {
     }
 
     /**
-     * TODO: step-parents.
-     * List the details of the parents of the person whose name is given. Note
-     * you need to do something about the possibility of duplicate names
-     * appearing.
+     * List the details of the parents of the person whose name is given. Also
+     * lists stepparents.
      * @param personName
      * @param aDOB
      */
@@ -201,7 +223,7 @@ public class FamilyTree {
                 } else {
                     details += personName + "'s parents:\n";
                 }
-
+                //find blood parents.
                 for (FamilyTreeNode<Person> parent : person.getParentLinks()) {
                     if (parent.getItem().isMother()) {
                         details += "Mother: ";
@@ -210,7 +232,10 @@ public class FamilyTree {
                         details += "Father: ";
                         details += parent.getItem().toString() + "\n";
                     }
-                    if (hasPartner(parent.getItem().getName(), parent.getItem().getDateOfBirth())) {
+                    //if the parent is married, and their partner is not also the 
+                    //person's parent, then the partner is a stepparent.
+                    //
+                    if (!parent.sideLinksIsEmpty() && !person.containsParentLink(parent.getSideLinks().get(0))) {
                         details += "Stepparent: ";
                         details += parent.getSideLinks().get(0).getItem().toString() + "\n";
                     }
@@ -225,8 +250,9 @@ public class FamilyTree {
     }
 
     /**
-     * List the details of the children of the person whose name is given, along
+     * Lists the details of the children of the person whose name is given, along
      * with their stepchildren, if any.
+     * 
      * @param personName
      * @param aDOB
      */
@@ -237,9 +263,8 @@ public class FamilyTree {
         if ((person = getPerson(personName, aDOB)) != null) {
 
             if (!person.childLinksIsEmpty()) {
-
                 details += personName + "'s children:\n";
-
+                //find and list each child that the person has.
                 for (FamilyTreeNode<Person> child : person.getChildLinks()) {
                     if (child.getItem().isAdopted()) {
                         details += "Adopted Child: ";
@@ -249,10 +274,12 @@ public class FamilyTree {
                     details += child.getItem().toString() + "\n";
                 }
             }
+            //check to see if the person has any step-children.
             if (hasPartner(personName, aDOB)) {
                 FamilyTreeNode<Person> partner = person.getSideLinks().get(0);
 
                 for (FamilyTreeNode<Person> child : partner.getChildLinks()) {
+                    //if this isn't the person's child, then it's a stepchild.
                     if (!person.containsChildLink(child)) {
                         details += "Stepchild: ";
                         details += child.getItem().toString() + "\n";
@@ -269,7 +296,6 @@ public class FamilyTree {
     }
 
     /**
-     * TODO: step-siblings, half-siblings.
      * List the details of the siblings of the person whose name is given. Note
      * you need to do something about the possibility of duplicate names
      * appearing.
@@ -279,43 +305,110 @@ public class FamilyTree {
     public String listSiblings(String personName, String aDOB) {
         String details = "";
         FamilyTreeNode<Person> person;
+        //Lists to hold various classes of siblings.
+        List<FamilyTreeNode<Person>> halfSiblings = new ArrayList<FamilyTreeNode<Person>>();
+        List<FamilyTreeNode<Person>> fullSiblings = new ArrayList<FamilyTreeNode<Person>>();
+        List<FamilyTreeNode<Person>> stepSiblings = new ArrayList<FamilyTreeNode<Person>>();
 
+        //make sure person exists first.
         if ((person = getPerson(personName, aDOB)) != null) {
+            //check to see if person has parents.
             if (!person.parentLinksIsEmpty()) {
                 for (FamilyTreeNode<Person> parent : person.getParentLinks()) {
                     for (FamilyTreeNode<Person> sibling : parent.getChildLinks()) {
+                        //make sure that we're looking at a sibling, not our chosen person.
                         if (!sibling.equals(person)) {
-                            if (details.isEmpty()) {
-                                details += personName + "'s siblings:\n";
-                            }
-                            if (!details.contains(sibling.getItem().toString())) {
-                                if (sibling.getItem().isAdopted()) {
-                                    details += "Adopted Sibling: ";
-                                } else {
-                                    details += "Sibling: ";
+                            //check to see if half sibling.
+                            for (FamilyTreeNode<Person> siblingParent : sibling.getParentLinks()) {
+                                //if the siblings only share one parent, then they are half siblings.
+                                if (!person.containsParentLink(siblingParent)) {
+                                    if (!halfSiblings.contains(sibling)) {
+                                        halfSiblings.add(sibling);
+                                    }
+                                    break;
                                 }
-                                details += sibling.getItem().toString() + "\n";
+                            }
+                            //another check to see if half sibling. Despite appearances,
+                            //this is required, or else certain half-siblings will 
+                            //be erroneously listed as full siblings.
+                            for (FamilyTreeNode<Person> personParent : person.getParentLinks()) {
+                                //if the siblings only share one parent, then they are half siblings.
+                                if (!sibling.containsParentLink(personParent)) {
+                                    if (!halfSiblings.contains(sibling)) {
+                                        halfSiblings.add(sibling);
+                                    }
+                                    break;
+                                }
+                            }
+                            //not a half-sibling, so must be full sibling.
+                            if (!halfSiblings.contains(sibling) && !fullSiblings.contains(sibling)) {
+                                fullSiblings.add(sibling);
                             }
                         }
                     }
                 }
-                if (details.isEmpty()) {
-                    details += personName + " has no siblings listed.\n";
+                //We've found full and half siblings, check for step-siblings.
+                for (FamilyTreeNode<Person> parent : person.getParentLinks()) {
+                    if (!parent.sideLinksIsEmpty()) {
+                        FamilyTreeNode<Person> partner = parent.getSideLinks().get(0);
+                        for (FamilyTreeNode<Person> sibling : partner.getChildLinks()) {
+                            if (!sibling.equals(person)) {
+                                if (!fullSiblings.contains(sibling)
+                                        && !halfSiblings.contains(sibling)
+                                        && !stepSiblings.contains(sibling)) {
+                                    stepSiblings.add(sibling);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //list sibling details.
+            if (!fullSiblings.isEmpty() || !halfSiblings.isEmpty() || !stepSiblings.isEmpty()) {
+                if (person.getItem().isAdopted()) {
+                    details += personName + "'s adoptive siblings:\n";
+                } else {
+                    details += personName + "'s siblings:\n";
+                }
+                for (FamilyTreeNode<Person> sibling : fullSiblings) {
+                    if (sibling.getItem().isAdopted()) {
+                        details += "Adopted sibling: ";
+                    } else {
+                        details += "Sibling: ";
+                    }
+                    details += sibling.getItem().toString() + "\n";
+                }
+                for (FamilyTreeNode<Person> sibling : halfSiblings) {
+                    if (sibling.getItem().isAdopted()) {
+                        details += "Adopted half sibling: ";
+                    } else {
+                        details += "Half sibling: ";
+                    }
+                    details += sibling.getItem().toString() + "\n";
+                }
+                for (FamilyTreeNode<Person> sibling : stepSiblings) {
+                    if (sibling.getItem().isAdopted()) {
+                        details += "Adopted step sibling: ";
+                    } else {
+                        details += "Step sibling: ";
+                    }
+                    details += sibling.getItem().toString() + "\n";
                 }
             } else {
-                details += personName + " has no parents listed. Thus, we cannnot find any siblings.\n";
+                System.out.println(personName + " has no siblings listed.");
             }
-
         } else {
-            details += personName + " is not in the tree.\n";
+            System.out.println(personName + " isn't in the tree.");
         }
+
         return details;
     }
 
     /**
-     * List the details of the ancestors along the paternal line  of the person
-     * whose name is given. Note you need to do something about the possibility
-     * of duplicate names appearing.
+     * List the details of the ancestors along the paternal line of the person
+     * whose name is given. Lists father, grandfather, great grandfather, etc,
+     * until it reaches the oldest known man in the paternal side of the tree.
+     * 
      * @param personName
      * @param aDOB
      */
@@ -326,6 +419,7 @@ public class FamilyTree {
 
 
         if ((person = getPerson(personName, aDOB)) != null) {
+            //continue until we can't find any more men.
             while (!person.parentLinksIsEmpty()) {
                 if (details.isEmpty()) {
                     if (person.getItem().isAdopted()) {
@@ -334,6 +428,7 @@ public class FamilyTree {
                         details += personName + "'s paternal lineage:\n";
                     }
                 }
+                //find the current person's father, and increase the generation int.
                 for (FamilyTreeNode<Person> father : person.getParentLinks()) {
                     if (father.getItem().isFather()) {
                         numGens += 1;
@@ -353,9 +448,10 @@ public class FamilyTree {
     }
 
     /**
-     * List the details of the ancestors along the maternal line  of the person
-     * whose name is given. Note you need to do something about the possibility
-     * of duplicate names appearing.
+     * List the details of the ancestors along the maternal line of the person
+     * whose name is given. Lists mother, grandmother, great grandmother, etc,
+     * until it reaches the oldest known woman in the maternal side of the tree.
+     * 
      * @param personName
      * @param aDOB
      */
@@ -365,14 +461,16 @@ public class FamilyTree {
         FamilyTreeNode<Person> person;
 
         if ((person = getPerson(personName, aDOB)) != null) {
+            //continue until we find ther oldest known woman in the tree.
             while (!person.parentLinksIsEmpty()) {
                 if (details.isEmpty()) {
                     if (person.getItem().isAdopted()) {
-                        details += personName + "'s adoptive maternal lineage (Order: Mother, Grandmother, Great Grandmother, etc):\n";
+                        details += personName + "'s adoptive maternal lineage:\n";
                     } else {
-                        details += personName + "'s maternal lineage (Order: Father, Grandfather, Great Grandfather, etc):\n";
+                        details += personName + "'s maternal lineage:\n";
                     }
                 }
+                //get the current person's mother, and increase the generation int.
                 for (FamilyTreeNode<Person> mother : person.getParentLinks()) {
                     if (mother.getItem().isMother()) {
                         numGens += 1;
@@ -393,8 +491,10 @@ public class FamilyTree {
 
     /**
      * List the details of the grandparents of the person
-     * whose name is given. Note you need to do something about the possibility
-     * of duplicate names appearing.
+     * whose name is given. 
+     * 
+     * Finds the person's parents, and then finds their parents, as those
+     * are the person's grandparents.
      * @param personName
      * @param aDOB
      */
@@ -433,8 +533,9 @@ public class FamilyTree {
 
     /**
      * List the details of the grandchildren of the person whose name is given.
-     * Note you need to do something about the possibility of duplicate names
-     * appearing.
+     * Finds the person's children's children, as those are the person's 
+     * grandchildren.
+     * 
      * @param personName
      * @param aDOB
      */
@@ -466,13 +567,15 @@ public class FamilyTree {
             details = personName + " isn't in the tree.\n";
         }
         return details;
-
-
     }
 
     /**
      * List the details of the cousins of the person whose name is given.
-     * 
+     * This looks pretty complex, but it's fairly simple once explained: We find
+     * the desired person's grandparents, and then find the grandparent's children.
+     * If the child in question isn't one of our person's parents, then it
+     * stands to reason that their children are our person's cousins.
+     *
      * @param personName
      * @param aDOB
      */
@@ -482,21 +585,28 @@ public class FamilyTree {
 
         if ((person = getPerson(personName, aDOB)) != null) {
             if (!person.parentLinksIsEmpty()) {
-                /* This looks pretty complex, but it's fairly simple once explained: We find
-                 * the desired person's grandparents, and then find the grandparent's children.
-                 * If the child in question isn't one of our person's parents, then it
-                 * stands to reason that their children are our person's cousins.
-                 */
+                //find parents.
                 for (FamilyTreeNode<Person> parent : person.getParentLinks()) {
+                    //find grandparents.
                     for (FamilyTreeNode<Person> grandparent : parent.getParentLinks()) {
+                        //find aunts and uncles.
                         for (FamilyTreeNode<Person> parentSibling : grandparent.getChildLinks()) {
+                            //find cousins, list them.
                             if (!parentSibling.equals(parent)) {
                                 for (FamilyTreeNode<Person> cousin : parentSibling.getChildLinks()) {
                                     if (details.isEmpty()) {
-                                        details += personName + "'s cousins:\n";
+                                        if (person.getItem().isAdopted()) {
+                                            details += personName + "'s adoptive cousins:\n";
+                                        } else {
+                                            details += personName + "'s cousins:\n";
+                                        }
                                     }
                                     if (!details.contains(cousin.getItem().toString())) {
-                                        details += "Cousin: ";
+                                        if (cousin.getItem().isAdopted()) {
+                                            details += "Adopted cousin: ";
+                                        } else {
+                                            details += "Cousin: ";
+                                        }
                                         details += cousin.getItem().toString() + "\n";
                                     }
                                 }
@@ -535,20 +645,29 @@ public class FamilyTree {
         if (numberOfGenerations > 0) {
             if ((person = getPerson(personName, aDOB)) != null) {
                 currentAncestors.add(person);
+                //loop through the generations until they reach zero.
                 for (int i = numberOfGenerations; i > 0; i--) {
                     for (FamilyTreeNode<Person> currentAncestor : currentAncestors) {
+                        //fill up nextAncestors with the parents of the people in currentAncestors.
                         for (FamilyTreeNode<Person> nextAncestor : currentAncestor.getParentLinks()) {
                             nextAncestors.add(nextAncestor);
                         }
                     }
+                    //copy nextAncestors to currentAncestors and clear nextAncestors
+                    //for the next loop.
                     currentAncestors.clear();
                     currentAncestors.addAll(nextAncestors);
                     nextAncestors.clear();
                 }
+                //list ancestors.
                 if (currentAncestors.isEmpty()) {
                     details += personName + " doesn't have any " + fixGenerations(numberOfGenerations).toLowerCase() + "parents.\n";
                 } else {
-                    details += personName + "'s " + fixGenerations(numberOfGenerations).toLowerCase() + "parents:\n";
+                    if (person.getItem().isAdopted()) {
+                        details += personName + "'s adopted " + fixGenerations(numberOfGenerations).toLowerCase() + "parents:\n";
+                    } else {
+                        details += personName + "'s " + fixGenerations(numberOfGenerations).toLowerCase() + "parents:\n";
+                    }
                 }
                 for (FamilyTreeNode<Person> currentAncestor : currentAncestors) {
                     if (currentAncestor.getItem().isMother()) {
@@ -601,7 +720,11 @@ public class FamilyTree {
                     details += personName + "'s " + fixGenerations(numberOfGenerations).toLowerCase() + "children:\n";
                 }
                 for (FamilyTreeNode<Person> currentChild : currentChildren) {
-                    details += fixGenerations(numberOfGenerations) + "child: ";
+                    if (currentChild.getItem().isAdopted()) {
+                        details += "Adopted" + fixGenerations(numberOfGenerations).toLowerCase() + " child";
+                    } else {
+                        details += fixGenerations(numberOfGenerations) + "child: ";
+                    }
                     details += currentChild.getItem().toString() + "\n";
                 }
             } else {
@@ -674,7 +797,7 @@ public class FamilyTree {
     }
 
     /**
-     * Returns true if the person specified has a father.
+     * Returns true if the person specified has a partner.
      * 
      * @param aName
      * @param aDOB

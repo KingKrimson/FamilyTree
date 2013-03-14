@@ -149,7 +149,7 @@ public class TestFamilyTree {
                     bridesName = scan.nextLine();
                     System.out.print("Bride's date of birth: ");
                     dOB = scan.nextLine();
-                    System.out.print("Groom's name :");
+                    System.out.print("Groom's name: ");
                     groomsName = scan.nextLine();
                     System.out.print("Groom's date of birth: ");
                     gDOB = scan.nextLine();

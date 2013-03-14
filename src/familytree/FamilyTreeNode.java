@@ -7,12 +7,13 @@ import java.util.List;
  *
  * @author Andrew Brown
  *
- * The node for my tree implementation. Since each node in the tree should have three 'link
- * points' which can have multiple links, I use the Java Collection's ArrayList
- * to hold the linked Nodes. Note that sideLinks is also a list; although the
- * family tree only needs one side link (for life partners), it makes sense for
- * a generic implementation of this tree/node pair to have the array; in the future, 
- * we might need to make a application that requires multiple sideLinks.
+ * The node for my family tree implementation. Since each node in the  family tree 
+ * should have three 'link points' which can have multiple links, I use the 
+ * Java Collection's ArrayList to hold the linked Nodes. Note that sideLinks is 
+ * also a list; although the family tree only needs one side link (for life partners), 
+ * it makes sense for a generic implementation of this tree/node pair to have 
+ * the array; in the future, we might need to make a application that requires 
+ * multiple sideLinks.
  */
 public class FamilyTreeNode<LI> {
 
@@ -34,7 +35,8 @@ public class FamilyTreeNode<LI> {
     }
 
     /**
-     * create a node that contains the item specified by item.
+     * create a node that contains the item specified by the parameter.
+     * 
      * @param item 
      */
     public FamilyTreeNode(LI item) {
@@ -87,6 +89,14 @@ public class FamilyTreeNode<LI> {
         return status;
     }
 
+    /**
+     * removes a two way parent/childLink between two linked nodes.
+     * takes the node to be removed from this node as a parameter.
+     * Uses the methods removeOneWayParentLink() and removeOneWayChildLink().
+     * 
+     * @param side
+     * @return 
+     */
     public int removeParentLink(FamilyTreeNode<LI> parent) {
 
         int status = 0;
@@ -96,7 +106,15 @@ public class FamilyTreeNode<LI> {
 
         return status;
     }
-
+    /**
+     * removes a one way parentLink between two nodes.
+     * removes the parent node specified in the parameters from
+     * this node.
+     * 
+     * @param side
+     * @return 
+     */
+    
     public int removeOneWayParentLink(FamilyTreeNode<LI> parent) {
 
         int status = 0;
@@ -150,6 +168,14 @@ public class FamilyTreeNode<LI> {
         return status;
     }
 
+    /**
+     * removes a two way child/parentLink between two linked nodes.
+     * takes the node to be removed from this node as a parameter.
+     * Uses the methods removeOneWayChildLink() and removeOneWayParentLink().
+     * 
+     * @param side
+     * @return 
+     */
     public int removeChildLink(FamilyTreeNode<LI> child) {
 
         int status = 0;
@@ -160,6 +186,14 @@ public class FamilyTreeNode<LI> {
         return status;
     }
 
+    /**
+     * removes a one way childLink between two nodes.
+     * removes the child node specified in the parameters from
+     * this node.
+     * 
+     * @param side
+     * @return 
+     */
     public int removeOneWayChildLink(FamilyTreeNode<LI> child) {
 
         int status = 0;
@@ -208,6 +242,14 @@ public class FamilyTreeNode<LI> {
         return status;
     }
 
+    /**
+     * removes a two way sideLink between two linked nodes.
+     * takes the node to be removed from this node as a parameter.
+     * Uses the method removeOneWaySideLink().
+     * 
+     * @param side
+     * @return 
+     */
     public int removeSideLink(FamilyTreeNode<LI> side) {
 
         int status = 0;
@@ -218,6 +260,14 @@ public class FamilyTreeNode<LI> {
         return status;
     }
 
+    /**
+     * removes a one way sideLink between two nodes.
+     * removes the node specified in the parameters from
+     * this node.
+     * 
+     * @param side
+     * @return 
+     */
     public int removeOneWaySideLink(FamilyTreeNode<LI> side) {
 
         int status = 0;
@@ -275,20 +325,35 @@ public class FamilyTreeNode<LI> {
         return contains;
     }
 
+    /**
+     * Returns true if sideLinks is empty.
+     * 
+     * @return 
+     */
     public boolean sideLinksIsEmpty() {
         if (sideLinks.isEmpty()) {
             return true;
         }
         return false;
     }
-
+    
+    /**
+     * Returns true if childLinks is empty.
+     * 
+     * @return 
+     */
     public boolean childLinksIsEmpty() {
         if (childLinks.isEmpty()) {
             return true;
         }
         return false;
     }
-
+    
+    /**
+     * Returns true if parentLinks is empty.
+     * 
+     * @return 
+     */
     public boolean parentLinksIsEmpty() {
         if (parentLinks.isEmpty()) {
             return true;
@@ -347,7 +412,7 @@ public class FamilyTreeNode<LI> {
     }
 
     /**
-     * Set the parentLinks list. Takes a list as a parameter.
+     * Set the parentLinks list. Takes another List as a parameter.
      * @param parentLinks 
      */
     public void setParentLinks(List<FamilyTreeNode<LI>> parentLinks) {
